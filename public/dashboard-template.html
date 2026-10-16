@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Automation Architect — Dashboard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<style>
+:root{
+  --ink:#1b2430;--muted:#5b6777;--line:#dde3ea;--bg:#f5f7fa;--card:#ffffff;
+  --blue:#1f5fbf;--blue-soft:#e8f0fc;--green:#1f8a4c;--green-soft:#e6f5ec;
+  --amber:#b7791f;--amber-soft:#fdf3dc;--red:#c0392b;--red-soft:#fbe9e7;
+  --p1:#2e7d32;--p2:#7cb342;--p3:#f9a825;--p4:#ef6c00;--p5:#c62828;
+}
+body{background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.navbar{background:var(--card);border-bottom:1px solid var(--line)}
+.navbar .nav-link{color:var(--muted);font-size:.9rem}
+.navbar .nav-link.active{color:var(--blue);font-weight:600}
+section{padding:3rem 0;border-bottom:1px solid var(--line)}
+h2{font-weight:700;margin-bottom:1.5rem}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--card)}
+.stat{padding:1.25rem;text-align:center}
+.stat .n{font-size:2rem;font-weight:700;color:var(--blue)}
+.stat .l{color:var(--muted);font-size:.85rem}
+.pain{display:inline-block;min-width:1.8em;text-align:center;color:#fff;border-radius:4px;font-weight:600;padding:.1em .4em}
+.pain-1{background:var(--p1)}.pain-2{background:var(--p2)}.pain-3{background:var(--p3);color:#222}.pain-4{background:var(--p4)}.pain-5{background:var(--p5)}
+th.sortable{cursor:pointer;user-select:none;white-space:nowrap}
+th.sortable::after{content:" ↕";color:#aab}
+.step{border-left:3px solid var(--line);padding:.6rem 1rem;margin-left:1rem;position:relative}
+.step::before{content:attr(data-n);position:absolute;left:-1.1rem;top:.65rem;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--blue);color:#fff;font-size:.75rem;display:flex;align-items:center;justify-content:center;font-weight:600}
+.step .meta{color:var(--muted);font-size:.85rem}
+.flag{border-radius:6px;padding:.4rem .7rem;margin:.4rem 0 0;font-size:.85rem}
+.flag-handoff{background:var(--amber-soft);border-left:4px solid var(--amber)}
+.flag-redundant{background:var(--red-soft);border-left:4px solid var(--red)}
+.flag-trigger{background:var(--green-soft);border-left:4px solid var(--green)}
+.endcap{background:var(--blue-soft);border-radius:6px;padding:.5rem .9rem;font-weight:600;margin:.5rem 0 .5rem 1rem}
+.badge-qw{background:var(--green)}
+.badge-conf-HIGH{background:var(--green)}.badge-conf-MEDIUM{background:var(--amber)}.badge-conf-LOW{background:var(--red)}
+.score-bar{height:10px;background:var(--line);border-radius:5px;overflow:hidden}
+.score-bar>div{height:100%;background:var(--blue)}
+.layer{border:1px dashed var(--line);border-radius:8px;padding:1rem;margin-bottom:1rem}
+.layer h6{color:var(--muted);text-transform:uppercase;font-size:.75rem;letter-spacing:.05em}
+.conn{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:.4rem 0}
+.node{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:.3rem .7rem;font-weight:600}
+.arrow{font-weight:700;padding:0 .3rem;border-radius:4px}
+.arrow-native{color:var(--green)}.arrow-api{color:var(--blue)}.arrow-manual{color:var(--red)}
+.conn small{color:var(--muted)}
+.phase{border-top:4px solid var(--blue)}
+.status{cursor:pointer}
+.task{display:flex;gap:.5rem;align-items:flex-start;padding:.25rem 0}
+.task input{margin-top:.35rem}
+.task.done label{text-decoration:line-through;color:var(--muted)}
+pre.dep{background:#f0f3f7;border-radius:8px;padding:1rem;font-size:.85rem}
+.kpi{padding:1.25rem;text-align:center}
+.kpi .from{color:var(--muted);text-decoration:line-through}
+.kpi .to{font-size:1.6rem;font-weight:700;color:var(--green)}
+.kpi .delta{font-size:.85rem;color:var(--green);font-weight:600}
+#toTop{position:fixed;right:1.2rem;bottom:1.2rem;display:none;z-index:50}
+.chart-wrap{position:relative;height:320px}
+footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
+@media print{
+  .navbar,#toTop,.filter-bar,.btn{display:none!important}
+  .collapse:not(.show){display:block!important}
+  .card{break-inside:avoid}
+  section{break-inside:avoid-page}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top" aria-label="Dashboard sections">
+  <div class="container-fluid px-4">
+    <span class="navbar-brand fw-bold" id="nav-org">Organization</span>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navLinks" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navLinks">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#executive-summary">Summary</a></li>
+        <li class="nav-item"><a class="nav-link" href="#process-inventory">Inventory</a></li>
+        <li class="nav-item"><a class="nav-link" href="#workflow-maps">Workflows</a></li>
+        <li class="nav-item"><a class="nav-link" href="#automation-opportunities">Opportunities</a></li>
+        <li class="nav-item"><a class="nav-link" href="#system-architecture">Architecture</a></li>
+        <li class="nav-item"><a class="nav-link" href="#implementation-roadmap">Roadmap</a></li>
+        <li class="nav-item"><a class="nav-link" href="#kpi-dashboard">KPIs</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<button id="toTop" class="btn btn-primary rounded-circle" aria-label="Back to top">↑</button>
+
+<main class="container-fluid px-4" id="main">
+
+<header class="py-4">
+  <h1 class="fw-bold mb-1">Automation Roadmap</h1>
+  <p class="text-secondary mb-0" id="hdr-sub"></p>
+</header>
+
+<!-- 1 -->
+<section id="executive-summary">
+  <h2>1. Executive Summary</h2>
+  <div class="row g-3 mb-4" id="stat-cards"></div>
+  <div class="row g-3">
+    <div class="col-lg-4">
+      <div class="card h-100 p-3">
+        <h5>Automation Readiness Score</h5>
+        <div class="chart-wrap" style="height:220px"><canvas id="readinessChart" aria-label="Readiness score gauge"></canvas></div>
+        <div class="text-center"><span class="display-5 fw-bold" id="readiness-n"></span> <span class="text-secondary">/ 100</span></div>
+      </div>
+    </div>
+    <div class="col-lg-8">
+      <div class="card h-100 p-3">
+        <h5>Score Breakdown</h5>
+        <div id="subscores"></div>
+        <hr>
+        <p class="mb-0"><strong>Overall Assessment:</strong> <span id="assessment"></span></p>
+        <div id="data-gaps"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="process-inventory">
+  <h2>2. Process Inventory</h2>
+  <div class="filter-bar mb-3" id="dept-filters" role="group" aria-label="Filter by department"></div>
+  <div class="card p-3 mb-4 table-responsive">
+    <table class="table table-hover align-middle mb-0" id="inv-table">
+      <thead><tr>
+        <th>#</th><th class="sortable" data-k="name">Process</th><th class="sortable" data-k="dept">Department</th><th>Owner</th><th>Frequency</th>
+        <th class="sortable" data-k="hours" data-num>Est. Hrs/Wk</th><th class="sortable" data-k="steps" data-num>Manual Steps</th><th>Tools Used</th><th class="sortable" data-k="pain" data-num>Pain</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div class="card p-3"><h5>Weekly Hours by Process</h5><div class="chart-wrap"><canvas id="hoursChart"></canvas></div></div>
+</section>
+
+<!-- 3 -->
+<section id="workflow-maps">
+  <h2>3. Department Workflow Maps</h2>
+  <div class="mb-3 small">
+    <span class="flag flag-handoff d-inline-block">⚠️ Manual handoff</span>
+    <span class="flag flag-redundant d-inline-block">🔄 Redundant</span>
+    <span class="flag flag-trigger d-inline-block">⚡ Automation trigger</span>
+  </div>
+  <div id="workflows"></div>
+  <div class="card p-3 mt-4"><h5>Workflow Composition</h5><div class="chart-wrap"><canvas id="compChart"></canvas></div></div>
+</section>
+
+<!-- 4 -->
+<section id="automation-opportunities">
+  <h2>4. Automation Opportunities</h2>
+  <div class="alert alert-light border mb-3"><strong>Priority Score Formula:</strong> <code>(Impact × 0.50) + ((10 − Complexity) × 0.30) + ((10 − Build Effort) × 0.20)</code></div>
+  <div class="card p-3 mb-3 table-responsive">
+    <table class="table table-hover align-middle mb-0" id="opp-table">
+      <thead><tr><th>Rank</th><th>Opportunity</th><th>Dept</th><th>Type</th><th>Impact</th><th>Complexity</th><th>Build Effort</th><th>Priority</th><th>Hrs Saved/Wk</th><th>Confidence</th><th>Quick Win</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+  <div id="overrides"></div>
+  <h5 class="mt-4">Opportunity Details</h5>
+  <div class="row g-3" id="opp-cards"></div>
+  <div class="row g-3 mt-2">
+    <div class="col-lg-6"><div class="card p-3"><h5>Impact vs. Complexity <small class="text-secondary">(bubble = hrs saved)</small></h5><div class="chart-wrap"><canvas id="bubbleChart"></canvas></div></div></div>
+    <div class="col-lg-3"><div class="card p-3"><h5>Hours Saved/Wk</h5><div class="chart-wrap"><canvas id="savedChart"></canvas></div></div></div>
+    <div class="col-lg-3"><div class="card p-3"><h5>By Approach Type</h5><div class="chart-wrap"><canvas id="typeChart"></canvas></div></div></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="system-architecture">
+  <h2>5. System Architecture</h2>
+  <div class="row g-3">
+    <div class="col-lg-7"><div class="card p-3"><h5>Tool Connection Map</h5><div id="layers"></div>
+      <div class="small mt-2"><span class="arrow arrow-native">→</span> Existing native &nbsp; <span class="arrow arrow-api">→</span> Needs API / middleware &nbsp; <span class="arrow arrow-manual">→</span> Manual bridge (eliminate)</div></div></div>
+    <div class="col-lg-5"><div class="card p-3 table-responsive"><h5>Integration Requirements</h5>
+      <table class="table table-sm mb-2" id="int-table"><thead><tr><th>Connection</th><th>Type</th><th>Method</th><th>Est. Cost</th><th>Phase</th></tr></thead><tbody></tbody></table>
+      <p class="mb-0 small" id="budget-note"></p></div></div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="implementation-roadmap">
+  <h2>6. Implementation Roadmap</h2>
+  <div class="row g-3" id="phases"></div>
+  <div class="card p-3 mt-4"><h5>Dependency Map</h5><pre class="dep mb-0" id="depmap"></pre></div>
+</section>
+
+<!-- 7 -->
+<section id="kpi-dashboard">
+  <h2>7. KPI Dashboard</h2>
+  <div class="row g-3 mb-4" id="kpi-cards"></div>
+  <div class="card p-3 mb-4 table-responsive">
+    <table class="table table-hover mb-0" id="kpi-table"><thead><tr><th>KPI</th><th>Department</th><th>Current Baseline</th><th>Target</th><th>Measurement Method</th></tr></thead><tbody></tbody></table>
+  </div>
+  <div class="row g-3">
+    <div class="col-lg-7"><div class="card p-3"><h5>Current vs. Target</h5><div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div></div>
+    <div class="col-lg-5"><div class="card p-3"><h5>Department Readiness</h5><div class="chart-wrap"><canvas id="radarChart"></canvas></div></div></div>
+  </div>
+</section>
+
+<footer>
+  <div id="footer-meta"></div>
+  <div class="mt-1">All estimates are approximations based on interview data. Validate with process owners before implementation. Hours-saved projections assume full adoption of recommended changes.</div>
+</footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+/* =====================================================================
+   DATA — the AI replaces this entire object with confirmed Phase 1–4 output.
+   Every number rendered on the page comes from here. Sample content below
+   is illustrative only and must be fully replaced.
+   ===================================================================== */
+const DATA = {
+  org: { name: "Sample Co", employees: 40, departments: 5, tools: 12, redundantTools: 2 },
+  generated: "2026-01-01",
+  summary: {
+    hoursSaved: 42, quickWins: 4,
+    readiness: 43,
+    subscores: [
+      { label: "Tool Integration", value: 45, why: "Only CRM↔email is native; everything else is manual." },
+      { label: "Process Documentation", value: 30, why: "Most mapped processes existed only in people's heads." },
+      { label: "Quick Win Ratio", value: 40, why: "4 of 10 opportunities qualify as quick wins." },
+      { label: "Team Capacity", value: 55, why: "Ops lead has ~5 hrs/week; no dedicated implementer." }
+    ],
+    assessment: "Significant automation potential but low readiness. Start with quick wins to build momentum before complex integrations.",
+    dataGaps: [] // strings; shown as a callout if non-empty
+  },
+  processes: [
+    { id:1, name:"Creative Brief → Deliverable", dept:"Creative", owner:"Project Managers", freq:"Daily", hours:18, steps:9, tools:"Docs, Slack, Asana, Figma", pain:5 },
+    { id:2, name:"Client Onboarding", dept:"Cross-Dept", owner:"AM Director", freq:"2-4x/month", hours:8, steps:14, tools:"HubSpot, Slack, Asana, QuickBooks", pain:5 },
+    { id:3, name:"Monthly Client Reporting", dept:"Account Mgmt", owner:"Account Managers", freq:"Monthly", hours:14, steps:7, tools:"HubSpot, GA, Sheets, Slides", pain:4 }
+  ],
+  workflows: [
+    { title:"Sales → Client Onboarding", pain:5, trigger:"Deal marked Closed Won in CRM", output:"Client onboarded, first project ready",
+      cycle:"2-3 weeks elapsed / 6-8 hrs active", note:"",
+      steps:[
+        { action:"AE updates deal status", owner:"AE", tool:"HubSpot", time:"~5 min", flags:[] },
+        { action:"AE posts in #new-deals", owner:"AE", tool:"Slack", time:"~5 min", flags:[{type:"handoff", text:"Deal details sent by Slack message instead of system trigger"}] },
+        { action:"AM creates project", owner:"AM", tool:"Asana", time:"~30 min", flags:[{type:"trigger", text:"Could auto-create from CRM deal data using a template"}] }
+      ]}
+  ],
+  opportunities: [
+    { rank:1, name:"Standardized Brief Template", dept:"Creative", type:"Simple Rule", impact:7, complexity:2, effort:2, hours:5, confidence:"HIGH",
+      current:"No standard brief; ~30% missing required info.", future:"Mandatory template with required fields.", savings:"~5 hrs/wk",
+      approach:"Simple Rule — checklist enforcement", deps:"None", timeline:"1-2 days", override:"" },
+    { rank:2, name:"Automated Client Reporting", dept:"Account Mgmt", type:"Conditional", impact:9, complexity:5, effort:6, hours:14, confidence:"MEDIUM",
+      current:"48-64 hrs/month manual data pulls.", future:"API aggregation into a report template.", savings:"~14 hrs/wk",
+      approach:"Conditional — multiple APIs", deps:"Middleware (Supermetrics/Funnel.io)", timeline:"3-4 weeks",
+      override:"Elevated per team lead: AMs are spending 48-64 hrs/month on reporting." }
+  ],
+  architecture: {
+    layers: [
+      { name:"Core Platform Layer", conns:[
+        { from:"HubSpot (CRM)", to:"Asana (PM)", kind:"api", note:"Needs integration — native or Zapier" },
+        { from:"HubSpot", to:"QuickBooks", kind:"api", note:"Deal close triggers billing" } ] },
+      { name:"Communication Layer", conns:[ { from:"HubSpot", to:"Gmail", kind:"native", note:"Existing native" } ] },
+      { name:"Retiring", conns:[ { from:"Monday.com", to:"Asana", kind:"manual", note:"Replaced" } ] }
+    ],
+    integrations: [
+      { conn:"HubSpot → Asana", type:"Automation", method:"Zapier or native", cost:"$20-50/mo", phase:"Phase 1" },
+      { conn:"Data APIs → Report", type:"Aggregation", method:"Supermetrics", cost:"$100-300/mo", phase:"Phase 2" }
+    ],
+    total:"$120-350/mo", budget:"$500/mo", budgetNote:"All recommended integrations fit within the stated $500/month budget."
+  },
+  roadmap: [
+    { name:"Quick Wins", when:"Weeks 1-2", opps:[1], outcome:"~12 hrs/week saved", cost:"$0",
+      tasks:["Deploy brief template (Day 1-2)","Set feedback policy (Day 1-3)"] },
+    { name:"Core Workflows", when:"Weeks 3-6", opps:[2], outcome:"cumulative ~33 hrs/week", cost:"$120-350/mo",
+      tasks:["Select aggregation tool (Wk 3-4)","Build report template (Wk 4-5)"] },
+    { name:"Advanced Integration", when:"Weeks 7-12", opps:[], outcome:"cumulative ~45 hrs/week", cost:"No new tools", tasks:["End-to-end onboarding orchestration (Wk 9-11)"] },
+    { name:"Optimization", when:"Ongoing", opps:[], outcome:"Sustained improvement", cost:"—", tasks:["Measure actual vs. estimated savings","Review KPIs quarterly"] }
+  ],
+  dependencyMap: "#1 (Brief Template) ──┐\n                       ├── #7 (Full Onboarding)\n#4 (CRM→PM) ───────────┘\n#2 (Reporting) [independent]",
+  kpis: {
+    headline: [
+      { label:"Weekly Manual Hours", from:"85 hrs", to:"40 hrs", delta:"-53%" },
+      { label:"Onboarding Time", from:"2-3 weeks", to:"3-5 days", delta:"-75%" }
+    ],
+    detail: [
+      { kpi:"Hours on manual reporting", dept:"Account Mgmt", baseline:"48-64 hrs/mo", target:"8-12 hrs/mo", method:"Time-tracking comparison", baseN:56, targetN:10 },
+      { kpi:"Creative revision rounds", dept:"Creative", baseline:"2.8 avg", target:"1.8 avg", method:"Asana revision count", baseN:2.8, targetN:1.8 }
+    ],
+    readinessByDept: [ { dept:"Sales", score:60 }, { dept:"Account Mgmt", score:45 }, { dept:"Creative", score:35 }, { dept:"Finance", score:50 } ]
+  }
+};
+
+/* ===================== RENDERING (do not edit below) ===================== */
+const $ = s => document.querySelector(s);
+const el = (t, c, h) => { const e = document.createElement(t); if (c) e.className = c; if (h !== undefined) e.innerHTML = h; return e; };
+const css = getComputedStyle(document.documentElement);
+const C = k => css.getPropertyValue(k).trim();
+const store = { get(k){ try{ return JSON.parse(localStorage.getItem(k)); }catch(e){ return null; } }, set(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} } };
+const prio = o => ((o.impact*0.5) + ((10-o.complexity)*0.3) + ((10-o.effort)*0.2)).toFixed(1);
+const isQW = o => o.impact>=5 && o.complexity<=3 && o.effort<=3;
+const flagMeta = { handoff:["flag-handoff","⚠️ MANUAL HANDOFF"], redundant:["flag-redundant","🔄 REDUNDANT"], trigger:["flag-trigger","⚡ AUTOMATION TRIGGER"] };
+const arrowCls = { native:"arrow-native", api:"arrow-api", manual:"arrow-manual" };
+
+// Header
+$("#nav-org").textContent = DATA.org.name;
+$("#hdr-sub").textContent = `${DATA.org.name} — ${DATA.org.employees} Employees • ${DATA.org.departments} Departments • ${DATA.org.tools} Tools`;
+$("#footer-meta").innerHTML = `<strong>Generated:</strong> ${DATA.generated} | <strong>Data Source:</strong> ${DATA.org.name} operational discovery (5 phases)`;
+
+// 1. Summary
+[
+  [DATA.org.departments,"Departments Mapped"],[DATA.processes.length,"Total Processes"],[DATA.opportunities.length,"Automation Opportunities"],
+  [DATA.summary.quickWins,"Quick Wins"],["~"+DATA.summary.hoursSaved,"Est. Hours Saved/Week"],[DATA.org.tools,`Tools in Stack <span class="badge bg-danger ms-1">${DATA.org.redundantTools} redundant</span>`]
+].forEach(([n,l])=>$("#stat-cards").appendChild(el("div","col-6 col-md-4 col-xl-2",`<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`)));
+$("#readiness-n").textContent = DATA.summary.readiness;
+$("#assessment").textContent = DATA.summary.assessment;
+DATA.summary.subscores.forEach(s=>$("#subscores").appendChild(el("div","mb-3",`<div class="d-flex justify-content-between"><span>${s.label}</span><strong>${s.value}/100</strong></div><div class="score-bar"><div style="width:${s.value}%"></div></div><div class="small text-secondary">${s.why}</div>`)));
+if (DATA.summary.dataGaps.length) $("#data-gaps").innerHTML = `<div class="alert alert-warning mt-3 mb-0"><strong>Data Gaps:</strong><ul class="mb-0">${DATA.summary.dataGaps.map(g=>`<li>${g}</li>`).join("")}</ul></div>`;
+new Chart($("#readinessChart"),{type:"doughnut",data:{datasets:[{data:[DATA.summary.readiness,100-DATA.summary.readiness],backgroundColor:[C("--blue"),C("--line")],borderWidth:0}]},options:{cutout:"75%",plugins:{legend:{display:false},tooltip:{enabled:false}},maintainAspectRatio:false}});
+
+// 2. Inventory
+let inv = [...DATA.processes], sortKey=null, sortDir=1, deptFilter="All";
+const depts = ["All",...new Set(DATA.processes.map(p=>p.dept))];
+depts.forEach(d=>{ const b=el("button",`btn btn-sm me-2 mb-2 ${d==="All"?"btn-primary":"btn-outline-primary"}`,d); b.onclick=()=>{deptFilter=d; document.querySelectorAll("#dept-filters button").forEach(x=>x.className="btn btn-sm me-2 mb-2 btn-outline-primary"); b.className="btn btn-sm me-2 mb-2 btn-primary"; renderInv();}; $("#dept-filters").appendChild(b); });
+function renderInv(){
+  const rows = inv.filter(p=>deptFilter==="All"||p.dept===deptFilter);
+  if (sortKey) rows.sort((a,b)=> (a[sortKey]>b[sortKey]?1:a[sortKey]<b[sortKey]?-1:0)*sortDir);
+  $("#inv-table tbody").innerHTML = rows.map(p=>`<tr><td>${p.id}</td><td><strong>${p.name}</strong></td><td>${p.dept}</td><td>${p.owner}</td><td>${p.freq}</td><td>${p.hours}</td><td>${p.steps}</td><td class="small">${p.tools}</td><td><span class="pain pain-${p.pain}">${p.pain}</span></td></tr>`).join("");
+}
+document.querySelectorAll("#inv-table th.sortable").forEach(th=>th.onclick=()=>{ const k=th.dataset.k; sortDir = sortKey===k ? -sortDir : (th.dataset.num!==undefined?-1:1); sortKey=k; renderInv(); });
+renderInv();
+const topProcs = [...DATA.processes].sort((a,b)=>b.hours-a.hours).slice(0,10);
+new Chart($("#hoursChart"),{type:"bar",data:{labels:topProcs.map(p=>p.name),datasets:[{label:"Hrs/Wk",data:topProcs.map(p=>p.hours),backgroundColor:topProcs.map(p=>C(`--p${p.pain}`))}]},options:{indexAxis:"y",plugins:{legend:{display:false}},maintainAspectRatio:false,scales:{x:{title:{display:true,text:"Hours per week"}}}}});
+
+// 3. Workflows
+DATA.workflows.forEach((w,i)=>{
+  const count = t => w.steps.reduce((n,s)=>n+(s.flags||[]).filter(f=>f.type===t).length,0);
+  w._h=count("handoff"); w._r=count("redundant"); w._t=count("trigger");
+  const body = w.steps.map((s,j)=>`<div class="step" data-n="${j+1}"><div><strong>${s.action}</strong></div><div class="meta">Owner: ${s.owner} • Tool: ${s.tool} • ${s.time}</div>${s.flags.map(f=>`<div class="flag ${flagMeta[f.type][0]}"><strong>${flagMeta[f.type][1]}:</strong> ${f.text}</div>`).join("")}</div>`).join("");
+  $("#workflows").appendChild(el("div","card mb-3",`
+    <div class="card-header bg-white d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#wf${i}" role="button" aria-expanded="${i===0}" aria-controls="wf${i}">
+      <div><strong>Workflow ${i+1}: ${w.title}</strong> <span class="pain pain-${w.pain} ms-2">Pain ${w.pain}</span></div>
+      <div class="small text-secondary">Steps <strong>${w.steps.length}</strong> • Handoffs <strong>${w._h}</strong> • Redundancies <strong>${w._r}</strong> • Triggers <strong>${w._t}</strong></div>
+    </div>
+    <div id="wf${i}" class="collapse ${i===0?"show":""}"><div class="card-body">
+      <div class="endcap">TRIGGER → ${w.trigger}</div>${body}<div class="endcap">OUTPUT → ${w.output}</div>
+      <p class="mt-3 mb-0"><strong>Cycle Time:</strong> ${w.cycle}${w.note?`<br><strong>Note:</strong> ${w.note}`:""}</p>
+    </div></div>`));
+});
+new Chart($("#compChart"),{type:"bar",data:{labels:DATA.workflows.map(w=>w.title),datasets:[
+  {label:"Manual Handoffs",data:DATA.workflows.map(w=>w._h),backgroundColor:C("--amber")},
+  {label:"Redundancies",data:DATA.workflows.map(w=>w._r),backgroundColor:C("--red")},
+  {label:"Automation Triggers",data:DATA.workflows.map(w=>w._t),backgroundColor:C("--green")}]},
+  options:{maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true}}}});
+
+// 4. Opportunities
+const opps = [...DATA.opportunities].sort((a,b)=>a.rank-b.rank);
+$("#opp-table tbody").innerHTML = opps.map(o=>`<tr><td>${o.rank}</td><td><strong>${o.name}</strong>${o.override?" ★":""}</td><td>${o.dept}</td><td>${o.type}</td><td>${o.impact}</td><td>${o.complexity}</td><td>${o.effort}</td><td><strong>${prio(o)}</strong></td><td>${o.hours}</td><td><span class="badge badge-conf-${o.confidence}">${o.confidence}</span></td><td>${isQW(o)?'<span class="badge badge-qw">Quick Win</span>':"—"}</td></tr>`).join("");
+opps.filter(o=>o.override).forEach(o=>$("#overrides").appendChild(el("div","alert alert-info py-2",`<strong>Override — Rank #${o.rank}:</strong> ${o.override} (calculated score ${prio(o)} retained)`)));
+opps.forEach(o=>$("#opp-cards").appendChild(el("div","col-lg-6",`<div class="card p-3 h-100">
+  <h6 class="fw-bold">#${o.rank} — ${o.name} ${isQW(o)?'<span class="badge badge-qw">Quick Win</span>':""} <span class="badge badge-conf-${o.confidence}">${o.confidence}</span></h6>
+  <div class="row small"><div class="col-6"><div class="text-secondary">Current State</div>${o.current}</div><div class="col-6"><div class="text-secondary">Future State</div>${o.future}</div></div>
+  <div class="row small mt-2"><div class="col-4"><div class="text-secondary">Savings</div>${o.savings}</div><div class="col-4"><div class="text-secondary">Approach</div>${o.approach}</div><div class="col-4"><div class="text-secondary">Timeline</div>${o.timeline}</div></div>
+  <div class="small mt-2"><span class="text-secondary">Dependencies:</span> ${o.deps}</div></div>`)));
+new Chart($("#bubbleChart"),{type:"bubble",data:{datasets:opps.map(o=>({label:`#${o.rank} ${o.name}`,data:[{x:o.complexity,y:o.impact,r:4+o.hours}],backgroundColor:isQW(o)?C("--green")+"aa":C("--blue")+"aa"}))},
+  options:{maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`${c.dataset.label}: impact ${c.raw.y}, complexity ${c.raw.x}, ${c.raw.r-4} hrs/wk`}}},
+  scales:{x:{min:0,max:10,title:{display:true,text:"Complexity → (left = quick wins)"}},y:{min:0,max:10,title:{display:true,text:"Impact ↑"}}}}});
+new Chart($("#savedChart"),{type:"bar",data:{labels:opps.map(o=>"#"+o.rank),datasets:[{data:opps.map(o=>o.hours),backgroundColor:C("--blue")}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}});
+const types = {}; opps.forEach(o=>types[o.type]=(types[o.type]||0)+1);
+new Chart($("#typeChart"),{type:"doughnut",data:{labels:Object.keys(types),datasets:[{data:Object.values(types),backgroundColor:[C("--green"),C("--blue"),C("--amber"),C("--red")]}]},options:{maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}}});
+
+// 5. Architecture
+DATA.architecture.layers.forEach(L=>$("#layers").appendChild(el("div","layer",`<h6>${L.name}</h6>${L.conns.map(c=>`<div class="conn"><span class="node">${c.from}</span><span class="arrow ${arrowCls[c.kind]}">→</span><span class="node">${c.to}</span><small>${c.note}</small></div>`).join("")}`)));
+$("#int-table tbody").innerHTML = DATA.architecture.integrations.map(i=>`<tr><td>${i.conn}</td><td>${i.type}</td><td>${i.method}</td><td>${i.cost}</td><td>${i.phase}</td></tr>`).join("") + `<tr class="table-light fw-bold"><td colspan="3">Total Estimated Monthly Cost</td><td>${DATA.architecture.total}</td><td>Budget ${DATA.architecture.budget}</td></tr>`;
+$("#budget-note").innerHTML = `<strong>Budget Note:</strong> ${DATA.architecture.budgetNote}`;
+
+// 6. Roadmap (status + checkboxes persisted per org)
+const key = s => `ops-dash:${DATA.org.name}:${s}`;
+const statuses = ["Not Started","In Progress","Done"], statusCls = ["bg-secondary","bg-warning text-dark","bg-success"];
+DATA.roadmap.forEach((p,i)=>{
+  const st = store.get(key(`phase${i}`)) ?? 0;
+  const done = store.get(key(`tasks${i}`)) ?? [];
+  const card = el("div","col-lg-6",`<div class="card phase p-3 h-100">
+    <div class="d-flex justify-content-between align-items-start"><div><div class="text-secondary small">Phase ${i+1} — ${p.when}</div><h5 class="mb-1">${p.name}</h5></div>
+    <span class="badge status ${statusCls[st]}" role="button" title="Click to change status">${statuses[st]}</span></div>
+    ${p.opps.length?`<div class="small text-secondary mb-2">Opportunities: ${p.opps.map(n=>"#"+n).join(", ")}</div>`:""}
+    <div class="tasks">${p.tasks.map((t,j)=>`<div class="task ${done.includes(j)?"done":""}"><input type="checkbox" id="t${i}_${j}" ${done.includes(j)?"checked":""} aria-label="${t}"><label for="t${i}_${j}">${t}</label></div>`).join("")}</div>
+    <hr><div class="small"><strong>Expected outcome:</strong> ${p.outcome}<br><strong>Cost:</strong> ${p.cost}</div></div>`);
+  const badge = card.querySelector(".status");
+  badge.onclick = ()=>{ const n=(statuses.indexOf(badge.textContent)+1)%3; badge.textContent=statuses[n]; badge.className=`badge status ${statusCls[n]}`; store.set(key(`phase${i}`),n); };
+  card.querySelectorAll("input").forEach((cb,j)=>cb.onchange=()=>{ const d=store.get(key(`tasks${i}`))??[]; const nd=cb.checked?[...new Set([...d,j])]:d.filter(x=>x!==j); store.set(key(`tasks${i}`),nd); cb.closest(".task").classList.toggle("done",cb.checked); });
+  $("#phases").appendChild(card);
+});
+$("#depmap").textContent = DATA.dependencyMap;
+
+// 7. KPIs
+DATA.kpis.headline.forEach(k=>$("#kpi-cards").appendChild(el("div","col-6 col-lg-3",`<div class="card kpi"><div class="small text-secondary">${k.label}</div><div class="from">${k.from}</div><div class="to">${k.to}</div><div class="delta">${k.delta}</div></div>`)));
+$("#kpi-table tbody").innerHTML = DATA.kpis.detail.map(k=>`<tr><td><strong>${k.kpi}</strong></td><td>${k.dept}</td><td>${k.baseline}</td><td>${k.target}</td><td class="small">${k.method}</td></tr>`).join("");
+const kn = DATA.kpis.detail.filter(k=>k.baseN!=null);
+new Chart($("#kpiChart"),{type:"bar",data:{labels:kn.map(k=>k.kpi),datasets:[{label:"Current",data:kn.map(k=>k.baseN),backgroundColor:C("--red")},{label:"Target",data:kn.map(k=>k.targetN),backgroundColor:C("--green")}]},options:{maintainAspectRatio:false,scales:{y:{beginAtZero:true}}}});
+new Chart($("#radarChart"),{type:"radar",data:{labels:DATA.kpis.readinessByDept.map(d=>d.dept),datasets:[{label:"Readiness",data:DATA.kpis.readinessByDept.map(d=>d.score),backgroundColor:C("--blue")+"33",borderColor:C("--blue")}]},options:{maintainAspectRatio:false,scales:{r:{min:0,max:100}}}});
+
+// Nav scroll-spy + back to top
+const links=[...document.querySelectorAll(".navbar .nav-link")], secs=links.map(a=>$(a.getAttribute("href")));
+const spy=()=>{ let i=secs.findIndex(s=>s.getBoundingClientRect().top>120); i = i===-1? secs.length-1 : Math.max(0,i-1); links.forEach((a,j)=>a.classList.toggle("active",j===i)); $("#toTop").style.display = window.scrollY>400?"block":"none"; };
+window.addEventListener("scroll",spy,{passive:true}); spy();
+$("#toTop").onclick=()=>window.scrollTo({top:0,behavior:"smooth"});
+</script>
+</body>
+</html>
