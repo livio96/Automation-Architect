@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: automation-architect
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /healthz
+    envVars:
+      - key: OPENROUTER_API_KEY
+        sync: false            # set this in the Render dashboard; never commit it
+      - key: OPENROUTER_MODEL
+        value: anthropic/claude-fable-5.1
+      - key: MAX_TOKENS
+        value: "16000"
+      - key: APP_PASSWORD
+        sync: false            # optional; leave blank for no password gate
+      - key: APP_URL
+        sync: false            # optional; your Render URL, sent to OpenRouter as the referer
