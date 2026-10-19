@@ -1,6 +1,8 @@
 # Automation Architect
 
-A web app that runs a structured, five-phase operations discovery conversation and ends with an interactive HTML dashboard: scored automation opportunities, workflow maps with flagged handoffs, a system architecture map, a phased roadmap, and KPIs.
+A web app that takes **one business process** the user describes in plain English, maps it end to end through a five-phase conversation (main path, variants, exception paths), and ends with an interactive HTML dashboard: scored automation opportunities, workflow maps with flagged handoffs, a tool-connection map for that process, a phased roadmap, and KPIs.
+
+It is deliberately *not* a company-wide ops audit: the unit of analysis is a single process (e.g. "Amazon FBA returns", "new-SKU listing creation"). To cover several processes, run one session each.
 
 Powered by OpenRouter (default model: `anthropic/claude-fable-5.1`). No database — each browser keeps its own session in localStorage.
 
@@ -36,13 +38,14 @@ export $(cat .env | xargs) && npm start
 
 ## How a session works
 
-1. User describes org, tool stack, and top three bottlenecks.
-2. The architect runs Discovery → Workflow Mapping → Opportunity Audit → Architecture & Planning, gating each phase on the user's confirmation. The sidebar tracks the phase.
+1. User describes one process: trigger, what "done" looks like, who touches it, tools, and what goes wrong. If they describe several, the architect asks which one to start with.
+2. The architect pins the process boundary, then runs Process Discovery (breakdown into stages/variants/exceptions) → Workflow Mapping → Opportunity Audit → Architecture & Planning, gating each phase on the user's confirmation. The sidebar tracks the phase.
 3. In Phase 5 the model emits one ` ```json ` block matching the schema in `prompt/system-prompt.md` §7. The client detects it, hides the raw JSON, and shows a **Dashboard ready** card with Open / Download.
 4. Open renders the dashboard in a new tab from `dashboard-template.html`; Download saves a single `.html` file anyone can open offline. Roadmap checkboxes and phase statuses persist in the viewer's browser.
 
 ## Customizing
 
 - **Prompt** — edit `prompt/system-prompt.md`. If you change the JSON schema in §7, mirror the change in the `DATA` sample and renderer in `public/dashboard-template.html`.
+- **Schema note** — the JSON keys (`org`, `processes`, `dept`, `readinessByDept`…) are kept from the original org-wide version so the renderer is unchanged; §7 of the prompt redefines their meaning for a single process (`org.name` = process name, `processes` = stages/variants, `dept` = stage/role). The dashboard labels reflect the single-process meaning.
 - **Model** — set `OPENROUTER_MODEL` to any OpenRouter chat model ID.
 - **Look** — colors live in `:root` at the top of `index.html` and `dashboard-template.html`.
