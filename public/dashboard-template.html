@@ -71,12 +71,12 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
 
 <nav class="navbar navbar-expand-lg sticky-top" aria-label="Dashboard sections">
   <div class="container-fluid px-4">
-    <span class="navbar-brand fw-bold" id="nav-org">Organization</span>
+    <span class="navbar-brand fw-bold" id="nav-org">Process</span>
     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navLinks" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="navLinks">
       <ul class="navbar-nav ms-auto">
         <li class="nav-item"><a class="nav-link" href="#executive-summary">Summary</a></li>
-        <li class="nav-item"><a class="nav-link" href="#process-inventory">Inventory</a></li>
+        <li class="nav-item"><a class="nav-link" href="#process-inventory">Breakdown</a></li>
         <li class="nav-item"><a class="nav-link" href="#workflow-maps">Workflows</a></li>
         <li class="nav-item"><a class="nav-link" href="#automation-opportunities">Opportunities</a></li>
         <li class="nav-item"><a class="nav-link" href="#system-architecture">Architecture</a></li>
@@ -91,13 +91,13 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
 <main class="container-fluid px-4" id="main">
 
 <header class="py-4">
-  <h1 class="fw-bold mb-1">Automation Roadmap</h1>
+  <h1 class="fw-bold mb-1">Process Automation Roadmap</h1>
   <p class="text-secondary mb-0" id="hdr-sub"></p>
 </header>
 
 <!-- 1 -->
 <section id="executive-summary">
-  <h2>1. Executive Summary</h2>
+  <h2>1. Summary</h2>
   <div class="row g-3 mb-4" id="stat-cards"></div>
   <div class="row g-3">
     <div class="col-lg-4">
@@ -121,23 +121,23 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
 
 <!-- 2 -->
 <section id="process-inventory">
-  <h2>2. Process Inventory</h2>
-  <div class="filter-bar mb-3" id="dept-filters" role="group" aria-label="Filter by department"></div>
+  <h2>2. Process Breakdown <small class="text-secondary fs-6">stages, variants &amp; exception paths</small></h2>
+  <div class="filter-bar mb-3" id="dept-filters" role="group" aria-label="Filter by stage or role"></div>
   <div class="card p-3 mb-4 table-responsive">
     <table class="table table-hover align-middle mb-0" id="inv-table">
       <thead><tr>
-        <th>#</th><th class="sortable" data-k="name">Process</th><th class="sortable" data-k="dept">Department</th><th>Owner</th><th>Frequency</th>
+        <th>#</th><th class="sortable" data-k="name">Stage / Variant</th><th class="sortable" data-k="dept">Role / Team</th><th>Owner</th><th>Frequency</th>
         <th class="sortable" data-k="hours" data-num>Est. Hrs/Wk</th><th class="sortable" data-k="steps" data-num>Manual Steps</th><th>Tools Used</th><th class="sortable" data-k="pain" data-num>Pain</th>
       </tr></thead>
       <tbody></tbody>
     </table>
   </div>
-  <div class="card p-3"><h5>Weekly Hours by Process</h5><div class="chart-wrap"><canvas id="hoursChart"></canvas></div></div>
+  <div class="card p-3"><h5>Weekly Hours by Stage</h5><div class="chart-wrap"><canvas id="hoursChart"></canvas></div></div>
 </section>
 
 <!-- 3 -->
 <section id="workflow-maps">
-  <h2>3. Department Workflow Maps</h2>
+  <h2>3. Workflow Maps <small class="text-secondary fs-6">main path, variants &amp; exceptions</small></h2>
   <div class="mb-3 small">
     <span class="flag flag-handoff d-inline-block">⚠️ Manual handoff</span>
     <span class="flag flag-redundant d-inline-block">🔄 Redundant</span>
@@ -153,7 +153,7 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
   <div class="alert alert-light border mb-3"><strong>Priority Score Formula:</strong> <code>(Impact × 0.50) + ((10 − Complexity) × 0.30) + ((10 − Build Effort) × 0.20)</code></div>
   <div class="card p-3 mb-3 table-responsive">
     <table class="table table-hover align-middle mb-0" id="opp-table">
-      <thead><tr><th>Rank</th><th>Opportunity</th><th>Dept</th><th>Type</th><th>Impact</th><th>Complexity</th><th>Build Effort</th><th>Priority</th><th>Hrs Saved/Wk</th><th>Confidence</th><th>Quick Win</th></tr></thead>
+      <thead><tr><th>Rank</th><th>Opportunity</th><th>Stage / Role</th><th>Type</th><th>Impact</th><th>Complexity</th><th>Build Effort</th><th>Priority</th><th>Hrs Saved/Wk</th><th>Confidence</th><th>Quick Win</th></tr></thead>
       <tbody></tbody>
     </table>
   </div>
@@ -169,7 +169,7 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
 
 <!-- 5 -->
 <section id="system-architecture">
-  <h2>5. System Architecture</h2>
+  <h2>5. Process Architecture</h2>
   <div class="row g-3">
     <div class="col-lg-7"><div class="card p-3"><h5>Tool Connection Map</h5><div id="layers"></div>
       <div class="small mt-2"><span class="arrow arrow-native">→</span> Existing native &nbsp; <span class="arrow arrow-api">→</span> Needs API / middleware &nbsp; <span class="arrow arrow-manual">→</span> Manual bridge (eliminate)</div></div></div>
@@ -191,11 +191,11 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
   <h2>7. KPI Dashboard</h2>
   <div class="row g-3 mb-4" id="kpi-cards"></div>
   <div class="card p-3 mb-4 table-responsive">
-    <table class="table table-hover mb-0" id="kpi-table"><thead><tr><th>KPI</th><th>Department</th><th>Current Baseline</th><th>Target</th><th>Measurement Method</th></tr></thead><tbody></tbody></table>
+    <table class="table table-hover mb-0" id="kpi-table"><thead><tr><th>KPI</th><th>Stage / Role</th><th>Current Baseline</th><th>Target</th><th>Measurement Method</th></tr></thead><tbody></tbody></table>
   </div>
   <div class="row g-3">
     <div class="col-lg-7"><div class="card p-3"><h5>Current vs. Target</h5><div class="chart-wrap"><canvas id="kpiChart"></canvas></div></div></div>
-    <div class="col-lg-5"><div class="card p-3"><h5>Department Readiness</h5><div class="chart-wrap"><canvas id="radarChart"></canvas></div></div></div>
+    <div class="col-lg-5"><div class="card p-3"><h5>Readiness by Stage / Role</h5><div class="chart-wrap"><canvas id="radarChart"></canvas></div></div></div>
   </div>
 </section>
 
@@ -214,7 +214,7 @@ footer{color:var(--muted);font-size:.85rem;padding:2rem 0}
    is illustrative only and must be fully replaced.
    ===================================================================== */
 const DATA = {
-  org: { name: "Sample Co", employees: 40, departments: 5, tools: 12, redundantTools: 2 },
+  org: { name: "Sample Process", employees: 4, departments: 3, tools: 5, redundantTools: 1 },
   generated: "2026-01-01",
   summary: {
     hoursSaved: 42, quickWins: 4,
@@ -300,13 +300,13 @@ const arrowCls = { native:"arrow-native", api:"arrow-api", manual:"arrow-manual"
 
 // Header
 $("#nav-org").textContent = DATA.org.name;
-$("#hdr-sub").textContent = `${DATA.org.name} — ${DATA.org.employees} Employees • ${DATA.org.departments} Departments • ${DATA.org.tools} Tools`;
-$("#footer-meta").innerHTML = `<strong>Generated:</strong> ${DATA.generated} | <strong>Data Source:</strong> ${DATA.org.name} operational discovery (5 phases)`;
+$("#hdr-sub").textContent = `${DATA.org.name} — ${DATA.org.employees} People involved • ${DATA.org.departments} Roles • ${DATA.org.tools} Tools`;
+$("#footer-meta").innerHTML = `<strong>Generated:</strong> ${DATA.generated} | <strong>Data Source:</strong> ${DATA.org.name} process discovery (5 phases)`;
 
 // 1. Summary
 [
-  [DATA.org.departments,"Departments Mapped"],[DATA.processes.length,"Total Processes"],[DATA.opportunities.length,"Automation Opportunities"],
-  [DATA.summary.quickWins,"Quick Wins"],["~"+DATA.summary.hoursSaved,"Est. Hours Saved/Week"],[DATA.org.tools,`Tools in Stack <span class="badge bg-danger ms-1">${DATA.org.redundantTools} redundant</span>`]
+  [DATA.org.departments,"Roles Involved"],[DATA.processes.length,"Stages &amp; Variants"],[DATA.opportunities.length,"Automation Opportunities"],
+  [DATA.summary.quickWins,"Quick Wins"],["~"+DATA.summary.hoursSaved,"Est. Hours Saved/Week"],[DATA.org.tools,`Tools Touched <span class="badge bg-danger ms-1">${DATA.org.redundantTools} redundant</span>`]
 ].forEach(([n,l])=>$("#stat-cards").appendChild(el("div","col-6 col-md-4 col-xl-2",`<div class="card stat"><div class="n">${n}</div><div class="l">${l}</div></div>`)));
 $("#readiness-n").textContent = DATA.summary.readiness;
 $("#assessment").textContent = DATA.summary.assessment;
