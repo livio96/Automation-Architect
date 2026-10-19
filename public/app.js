@@ -70,7 +70,7 @@ function dashboardCard(data) {
   const card = document.createElement("div");
   card.className = "dash-card";
   const n = data.opportunities?.length ?? 0, qw = data.summary?.quickWins ?? 0, hrs = data.summary?.hoursSaved ?? "–", r = data.summary?.readiness ?? "–";
-  card.innerHTML = `<div><strong>Dashboard ready — ${escapeHtml(data.org?.name || "your organization")}</strong><small>${n} opportunities · ${qw} quick wins · ~${hrs} hrs/week · readiness ${r}/100</small></div>
+  card.innerHTML = `<div><strong>Dashboard ready — ${escapeHtml(data.org?.name || "your process")}</strong><small>${n} opportunities · ${qw} quick wins · ~${hrs} hrs/week · readiness ${r}/100</small></div>
     <div class="actions"><button class="success" data-act="open">Open</button><button data-act="download">Download .html</button></div>`;
   card.querySelector('[data-act="open"]').onclick = () => buildDashboard(data, "open");
   card.querySelector('[data-act="download"]').onclick = () => buildDashboard(data, "download");
@@ -189,7 +189,7 @@ $("#exportBtn").onclick = () => {
   if (!messages.length) return;
   const md = messages.map(m => `## ${m.role === "user" ? "You" : "Architect"}\n\n${m.content}`).join("\n\n---\n\n");
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" })); a.download = `ops-discovery-${today()}.md`; a.click();
+  a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" })); a.download = `process-discovery-${today()}.md`; a.click();
 };
 $("#openDash").onclick = () => latestDashboardData && buildDashboard(latestDashboardData, "open");
 $("#example").onclick = () => { input.value = $("#example").textContent.trim(); autosize(); input.focus(); };
@@ -202,5 +202,5 @@ function autosize() { input.style.height = "auto"; input.style.height = Math.min
 // ---------- utils ----------
 function scrollBottom() { messagesEl.scrollTop = messagesEl.scrollHeight; }
 function today() { return new Date().toISOString().slice(0, 10); }
-function slug(s) { return (s || "org").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
+function slug(s) { return (s || "process").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""); }
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
