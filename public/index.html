@@ -74,10 +74,10 @@ textarea:focus{outline:2px solid var(--blue-soft);border-color:var(--blue)}
 <aside>
   <div class="brand">
     <svg viewBox="0 0 100 100"><rect width="100" height="100" rx="20" fill="#1f5fbf"/><path d="M25 70 L45 45 L60 58 L78 30" stroke="#fff" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    <div>Automation Architect<small>Ops discovery → automation roadmap</small></div>
+    <div>Automation Architect<small>One process → automation roadmap</small></div>
   </div>
   <div class="phases" id="phases">
-    <div class="phase" data-p="1"><span class="dot">1</span>Discovery</div>
+    <div class="phase" data-p="1"><span class="dot">1</span>Process Discovery</div>
     <div class="phase" data-p="2"><span class="dot">2</span>Workflow Mapping</div>
     <div class="phase" data-p="3"><span class="dot">3</span>Opportunity Audit</div>
     <div class="phase" data-p="4"><span class="dot">4</span>Architecture &amp; Planning</div>
@@ -94,10 +94,11 @@ textarea:focus{outline:2px solid var(--blue-soft);border-color:var(--blue)}
 <main>
   <div id="messages">
     <div class="welcome" id="welcome">
-      <h2>Start a discovery session</h2>
-      <p>Describe your organization, your tool stack, and your top three bottlenecks. The architect runs five gated phases and ends with an interactive dashboard your team can work from. Plan on 60–90 minutes for a thorough pass, or front-load everything you know and it will switch to Fast Track.</p>
-      <div class="example" id="example">We're a 25-person B2B electronics reseller selling on eBay, Amazon, Walmart, Best Buy, Shopify and our own webstore. NetSuite is our ERP, ShipStation handles shipping, and we use Outlook and Slack. Our biggest bottlenecks are returns processing across marketplaces, creating listings on every channel for each new SKU, and reconciling inventory between NetSuite and the marketplaces.</div>
+      <h2>Map one process</h2>
+      <p>Describe a single business process: what starts it, what “done” looks like, who touches it, which tools are involved, and what frustrates you about it. The architect maps that one process end to end — main path, variants and exceptions — through five gated phases and ends with an interactive dashboard the people who run it can work from. Plan on 30–60 minutes, or front-load every step you know and it will switch to Fast Track.</p>
+      <div class="example" id="example">Process: Amazon FBA customer returns. It starts when Amazon notifies us of a return and ends when the unit is restocked, sent back to the vendor, or scrapped and the refund is reconciled in NetSuite. Two warehouse people receive and inspect, one customer-service rep handles the Amazon case, and accounting reconciles the refund. Tools: Amazon Seller Central, NetSuite, a shared Excel log, Outlook. We spend about 15 hours a week on it, and about a third of returns show up with no RMA number so someone has to figure out what the item is.</div>
       <ol>
+        <li>Stick to one process. If you have several, the architect will ask which to start with.</li>
         <li>Answer the follow-up questions with real numbers. "4 hrs/week" beats "too long."</li>
         <li>Confirm or correct each phase before the architect moves on.</li>
         <li>When the dashboard appears, open it, save it, and share the file with your team.</li>
@@ -106,7 +107,7 @@ textarea:focus{outline:2px solid var(--blue-soft);border-color:var(--blue)}
   </div>
   <form id="form">
     <div class="composer">
-      <textarea id="input" placeholder="Describe your org, tools and bottlenecks — or answer the architect's question…" rows="1"></textarea>
+      <textarea id="input" placeholder="Describe one process — trigger, steps, people, tools, what goes wrong — or answer the architect's question…" rows="1"></textarea>
       <button class="primary" id="send" type="submit">Send</button>
     </div>
     <div class="hint"><span>Enter to send · Shift+Enter for a new line</span><span id="status"></span></div>
